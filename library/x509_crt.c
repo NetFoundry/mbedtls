@@ -70,6 +70,8 @@
 
 #if defined(_WIN32) && !defined(EFIX64) && !defined(EFI32)
 #include <windows.h>
+#include <winsock2.h>
+#define inet_pton(f,a,addr) InetPtonW(f,addr,a,strlen(a))
 #else
 #include <time.h>
 #endif
@@ -80,6 +82,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #endif /* !_WIN32 || EFIX64 || EFI32 */
 #endif
 
@@ -2957,17 +2962,30 @@ find_parent:
 static int x509_crt_check_cn( const mbedtls_x509_buf *name,
                               const char *cn, size_t cn_len )
 {
-    /* try exact match */
-    if( name->len == cn_len &&
-        x509_memcasecmp( cn, name->p, cn_len ) == 0 )
-    {
-        return( 0 );
-    }
+    int san_type = name->tag & 0x1f; /* last 5 bits */
+    if (san_type == MBEDTLS_X509_SAN_DNS_NAME) {
+        /* try exact match */
+        if (name->len == cn_len &&
+            x509_memcasecmp(cn, name->p, cn_len) == 0) {
+            return (0);
+        }
 
-    /* try wildcard match */
-    if( x509_check_wildcard( cn, name ) == 0 )
-    {
-        return( 0 );
+        /* try wildcard match */
+        if (x509_check_wildcard(cn, name) == 0) {
+            return (0);
+        }
+    } else if (san_type == MBEDTLS_X509_SAN_IP_ADDRESS) {
+        struct in_addr ipv4;
+        struct in6_addr ipv6;
+
+        if (name->len == 4 &&
+            inet_pton(AF_INET, cn, &ipv4) == 1 &&
+            x509_memcasecmp(&ipv4, name->p, name->len) == 0) {
+            return (0);
+        } else if (inet_pton(AF_INET6, cn, &ipv6) == 1) {
+
+        }
+
     }
 
     return( -1 );
