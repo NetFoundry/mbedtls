@@ -2982,10 +2982,10 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
             inet_pton(AF_INET, cn, &ipv4) == 1 &&
             x509_memcasecmp(&ipv4, name->p, name->len) == 0) {
             return (0);
-        } else if (inet_pton(AF_INET6, cn, &ipv6) == 1) {
-
+        } else if (inet_pton(AF_INET6, cn, &ipv6) == 1 &&
+            x509_memcasecmp(&ipv6, name->p, name->len) == 0) {
+            return (0);
         }
-
     }
 
     return( -1 );
