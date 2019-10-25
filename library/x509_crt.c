@@ -2963,22 +2963,8 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
                               const char *cn, size_t cn_len )
 {
     int san_type = name->tag & 0x1f; /* last 5 bits */
-    if( san_type == MBEDTLS_X509_SAN_DNS_NAME )
-    {
-        /* try exact match */
-        if( name->len == cn_len &&
-            x509_memcasecmp( cn, name->p, cn_len ) == 0 )
-        {
-            return( 0 );
-        }
 
-        /* try wildcard match */
-        if( x509_check_wildcard(cn, name) == 0 )
-        {
-            return( 0 );
-        }
-    }
-    else if( san_type == MBEDTLS_X509_SAN_IP_ADDRESS )
+    if( san_type == MBEDTLS_X509_SAN_IP_ADDRESS )
     {
         struct in_addr ipv4;
         struct in6_addr ipv6;
@@ -2991,6 +2977,21 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
         }
         else if( inet_pton( AF_INET6, cn, &ipv6 ) == 1 &&
                  memcmp( &ipv6, name->p, name->len ) == 0 )
+        {
+            return( 0 );
+        }
+    }
+    else
+    {
+        /* try exact match */
+        if( name->len == cn_len &&
+            x509_memcasecmp( cn, name->p, cn_len ) == 0 )
+        {
+            return( 0 );
+        }
+
+        /* try wildcard match */
+        if( x509_check_wildcard(cn, name) == 0 )
         {
             return( 0 );
         }
