@@ -70,8 +70,6 @@
 
 #if defined(_WIN32) && !defined(EFIX64) && !defined(EFI32)
 #include <windows.h>
-#include <winsock2.h>
-#define inet_pton(f,a,addr) InetPtonW(f,addr,a,strlen(a))
 #else
 #include <time.h>
 #endif
@@ -82,10 +80,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#endif /* !_WIN32 || EFIX64 || EFI32 */
+#endif
+
+#if defined(_WIN32)
+#include <winsock2.h>
+#define inet_pton(f,a,addr) InetPtonW(f,addr,a,strlen(a))
+#else
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#endif /* !_WIN32 || EFIX64 || EFI32 */
 #endif
 
 /*
