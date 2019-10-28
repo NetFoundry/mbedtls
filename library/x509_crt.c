@@ -83,14 +83,6 @@
 #endif /* !_WIN32 || EFIX64 || EFI32 */
 #endif
 
-#if defined(_WIN32)
-#include <winsock2.h>
-#define inet_pton(f,a,addr) InetPtonW(f,addr,a,strlen(a))
-#else
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#endif
-
 /*
  * Item in a verification chain: cert and flags for it
  */
@@ -2959,6 +2951,97 @@ find_parent:
     }
 }
 
+static int parse_ipv4( const char* h, char *addr )
+{
+    unsigned char ip[4];
+    int i;
+    const char *strt = h;
+    char *endp;
+    for( i = 0; i < 4; i++ )
+    {
+        unsigned long v = strtoul( strt, &endp, 10 );
+        if( endp == strt || v > 255 )
+        {
+            return ( 0 );
+        }
+
+        if( i < 3 && *endp != '.' )
+        {
+            return ( 0 );
+        }
+        ip[i] = v & (unsigned char)0xFF;
+        strt = endp + 1;
+    }
+
+    memcpy( addr, ip, sizeof ip);
+    return ( 1 );
+}
+
+static int parse_ipv6( const char* h, size_t hlen, char *addr )
+{
+    const char* hend = h + hlen;
+    unsigned char ip[16];
+    const char *strt = h;
+    char *endp = (char*)strt;
+    unsigned char *colonp = NULL;
+    unsigned char *ipp = ip;
+
+    /* can only start with double colon when network part is all zeros */
+    if( *strt == ':' )
+    {
+        strt++;
+        if (*strt != ':' ) {
+            return (0);
+        }
+    }
+
+    while( endp < hend )
+    {
+        if( *strt == ':')
+        {
+            if( colonp )
+            {
+                return ( 0 );
+            }
+            colonp = ipp;
+            strt++;
+        }
+        unsigned long v = strtoul(strt, &endp, 16);
+        if( v > 0xFFFF)
+        {
+            return ( 0 );
+        }
+        *ipp++ = (v >> 8) & (unsigned char)0xFF;
+        *ipp++ = v & (unsigned char)0xFF;
+
+        if( *endp == ':' )
+        {
+            strt = endp + 1;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    /* not enough digits without shorthand */
+    if( colonp == NULL && ipp < ip + sizeof ip )
+    {
+        return ( 0 );
+    }
+
+    memset(addr, 0, sizeof ip);
+    if( colonp )
+    {
+        memcpy(addr, ip, colonp - ip);
+        memcpy(addr + 16 - (ipp - colonp), colonp, ipp - colonp);
+    }
+    else
+    {
+        memcpy(addr, ip, sizeof ip);
+    }
+    return ( 1 );
+}
 /*
  * Check for CN match
  */
@@ -2969,17 +3052,17 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
 
     if( san_type == MBEDTLS_X509_SAN_IP_ADDRESS )
     {
-        struct in_addr ipv4;
-        struct in6_addr ipv6;
+        char ipv4[4];
+        char ipv6[16];
 
         if( name->len == 4 &&
-            inet_pton( AF_INET, cn, &ipv4 ) == 1 &&
+            parse_ipv4( cn, ipv4 ) == 1 &&
             memcmp( &ipv4, name->p, name->len ) == 0 )
         {
             return( 0 );
         }
-        else if( inet_pton( AF_INET6, cn, &ipv6 ) == 1 &&
-                 memcmp( &ipv6, name->p, name->len ) == 0 )
+        else if( parse_ipv6( cn, cn_len, ipv6 ) == 1 &&
+                 memcmp( ipv6, name->p, name->len ) == 0 )
         {
             return( 0 );
         }
