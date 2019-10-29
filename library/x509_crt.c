@@ -2951,7 +2951,11 @@ find_parent:
     }
 }
 
-static int parse_ipv4( const char* h, char *addr )
+/*
+ * parse ipv4 address from canonical string form into bytes.
+ * return 1 if success, 0 otherwise (consistent with inet_pton)
+ */
+static int parse_ipv4( const char *h, char *addr )
 {
     unsigned char ip[4];
     int i;
@@ -2974,13 +2978,17 @@ static int parse_ipv4( const char* h, char *addr )
         strt = endp + 1;
     }
 
-    memcpy( addr, ip, sizeof ip);
+    memcpy( addr, ip, sizeof( ip ) );
     return ( 1 );
 }
 
-static int parse_ipv6( const char* h, size_t hlen, char *addr )
+/*
+ * parse ipv6 address from canonical string form into bytes.
+ * return 1 if success, 0 otherwise (consistent with inet_pton)
+ */
+static int parse_ipv6( const char *h, size_t hlen, char *addr )
 {
-    const char* hend = h + hlen;
+    const char *hend = h + hlen;
     unsigned char ip[16];
     const char *strt = h;
     char *endp = (char*)strt;
@@ -2993,7 +3001,7 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
     {
         strt++;
         if (*strt != ':' ) {
-            return (0);
+            return ( 0 );
         }
     }
 
@@ -3027,12 +3035,12 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
     }
 
     /* not enough digits without shorthand */
-    if( colonp == NULL && ipp < ip + sizeof ip )
+    if( colonp == NULL && ipp < ip + sizeof( ip ) )
     {
         return ( 0 );
     }
 
-    memset( addr, 0, sizeof ip );
+    memset( addr, 0, sizeof( ip ) );
     if( colonp )
     {
         memcpy( addr, ip, colonp - ip );
@@ -3040,7 +3048,7 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
     }
     else
     {
-        memcpy( addr, ip, sizeof ip );
+        memcpy( addr, ip, sizeof( ip ) );
     }
     return ( 1 );
 }
