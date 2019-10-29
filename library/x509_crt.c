@@ -2957,9 +2957,10 @@ static int parse_ipv4( const char* h, char *addr )
     int i;
     const char *strt = h;
     char *endp;
+    unsigned long v;
     for( i = 0; i < 4; i++ )
     {
-        unsigned long v = strtoul( strt, &endp, 10 );
+        v = strtoul( strt, &endp, 10 );
         if( endp == strt || v > 255 )
         {
             return ( 0 );
@@ -2985,6 +2986,7 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
     char *endp = (char*)strt;
     unsigned char *colonp = NULL;
     unsigned char *ipp = ip;
+    unsigned long v;
 
     /* can only start with double colon when network part is all zeros */
     if( *strt == ':' )
@@ -3006,7 +3008,7 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
             colonp = ipp;
             strt++;
         }
-        unsigned long v = strtoul(strt, &endp, 16);
+        v = strtoul( strt, &endp, 16 );
         if( v > 0xFFFF)
         {
             return ( 0 );
@@ -3030,15 +3032,15 @@ static int parse_ipv6( const char* h, size_t hlen, char *addr )
         return ( 0 );
     }
 
-    memset(addr, 0, sizeof ip);
+    memset( addr, 0, sizeof ip );
     if( colonp )
     {
-        memcpy(addr, ip, colonp - ip);
-        memcpy(addr + 16 - (ipp - colonp), colonp, ipp - colonp);
+        memcpy( addr, ip, colonp - ip );
+        memcpy( addr + 16 - (ipp - colonp), colonp, ipp - colonp );
     }
     else
     {
-        memcpy(addr, ip, sizeof ip);
+        memcpy( addr, ip, sizeof ip );
     }
     return ( 1 );
 }
@@ -3077,7 +3079,7 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
         }
 
         /* try wildcard match */
-        if( x509_check_wildcard(cn, name) == 0 )
+        if( x509_check_wildcard( cn, name ) == 0 )
         {
             return( 0 );
         }
