@@ -3071,7 +3071,8 @@ static int x509_crt_check_cn( const mbedtls_x509_buf *name,
         {
             return( 0 );
         }
-        else if( parse_ipv6( cn, cn_len, ipv6 ) == 1 &&
+        else if( name->len == 16 &&
+                 parse_ipv6( cn, cn_len, ipv6 ) == 1 &&
                  memcmp( ipv6, name->p, name->len ) == 0 )
         {
             return( 0 );
