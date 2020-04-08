@@ -3007,6 +3007,12 @@ static int parse_ipv6( const char *h, size_t hlen, char *addr )
 
     while( endp < hend )
     {
+        /* ended with a single colon */
+        if( strt == hend )
+        {
+            return ( 0 );
+        }
+
         if( *strt == ':')
         {
             if( colonp )
@@ -3036,6 +3042,12 @@ static int parse_ipv6( const char *h, size_t hlen, char *addr )
 
     /* not enough digits without shorthand */
     if( colonp == NULL && ipp < ip + sizeof( ip ) )
+    {
+        return ( 0 );
+    }
+
+    /* did not consume the whole address */
+    if( endp != hend )
     {
         return ( 0 );
     }
