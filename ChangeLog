@@ -32,6 +32,8 @@ Features
    * Add support for Windows 2000 in net_sockets. Contributed by opatomic. #3239
 
 Security
+   * X.509 hostname verification now supports IPAddress Subject Alternate Names.
+     Contributed by Eugene Kobyakov (NetFoundry)
    * Fix a side channel vulnerability in modular exponentiation that could
      reveal an RSA private key used in a secure enclave. Noticed by Sangho Lee,
      Ming-Wei Shih, Prasun Gera, Taesoo Kim and Hyesoon Kim (Georgia Institute
@@ -312,8 +314,6 @@ Changes
 = mbed TLS 2.19.1 branch released 2019-09-16
 
 Features
-   * Declare include headers as PUBLIC to propagate to CMake project consumers
-     Contributed by Zachary J. Fields in PR #2949.
    * Add nss_keylog to ssl_client2 and ssl_server2, enabling easier analysis of
      TLS sessions with tools like Wireshark.
 
@@ -321,10 +321,6 @@ API Changes
    * Make client_random and server_random const in
      mbedtls_ssl_export_keys_ext_t, so that the key exporter is discouraged
      from modifying the client/server hello.
-
-Bugfix
-   * Fix some false-positive uninitialized variable warnings in crypto. Fix
-     contributed by apple-ihack-geek in #2663.
 
 = mbed TLS 2.19.0 branch released 2019-09-06
 
@@ -437,9 +433,6 @@ Changes
    * Extended .gitignore to ignore Visual Studio artifacts. Fixed by ConfusedSushi.
    * Adds fuzz targets, especially for continuous fuzzing with OSS-Fuzz.
      Contributed by Philippe Antoine (Catena cyber).
-   * Remove the crypto part of the library from Mbed TLS. The crypto
-     code and tests are now only available via Mbed Crypto, which
-     Mbed TLS references as a Git submodule.
 
 = mbed TLS 2.18.1 branch released 2019-07-12
 
