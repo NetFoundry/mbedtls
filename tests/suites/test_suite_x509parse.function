@@ -10,6 +10,8 @@
 #include "mbedtls/error.h"
 #include "string.h"
 
+#include <x509_invasive.h>
+
 #if MBEDTLS_X509_MAX_INTERMEDIATE_CA > 19
 #error "The value of MBEDTLS_X509_MAX_INTERMEDIATE_C is larger \
 than the current threshold 19. To test larger values, please \
@@ -414,6 +416,59 @@ void x509_accessor_ext_types( int ext_type, int has_ext_type )
     TEST_ASSERT( mbedtls_x509_crt_has_ext_type( &crt, has_ext_type ) == expected_result );
 
     mbedtls_x509_crt_free( &crt );
+}
+/* END_CASE */
+
+
+/* BEGIN_CASE depends_on:MBEDTLS_X509_CRT_PARSE_C:MBEDTLS_TEST_HOOKS */
+void x509_ipv4_parse( char * ipv4, data_t * exp, int ref_ret )
+{
+    unsigned char addr[4];
+    int ret = mbedtls_x509_parse_ipv4( ipv4, strlen(ipv4), addr  );
+    TEST_EQUAL( ret, ref_ret );
+
+    if( ret == 0 ) {
+        ASSERT_COMPARE( exp->x, exp->len, addr, sizeof( addr ) );
+    }
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:MBEDTLS_X509_CRT_PARSE_C:MBEDTLS_TEST_HOOKS */
+void x509_ipv6_parse( char * ipv6, data_t * exp, int ref_ret )
+{
+    unsigned char addr[16];
+    int ret = mbedtls_x509_parse_ipv6( ipv6, strlen(ipv6), addr  );
+    TEST_EQUAL( ret, ref_ret );
+
+    if( ret == 0 ) {
+        ASSERT_COMPARE( exp->x, exp->len, addr, sizeof( addr ) );
+    }
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:MBEDTLS_X509_CRT_PARSE_C:MBEDTLS_TEST_HOOKS */
+void x509_ipv4_parse( char * ipv4, data_t * exp, int ref_ret )
+{
+    unsigned char addr[4];
+    int ret = mbedtls_x509_parse_ipv4( ipv4, strlen(ipv4), addr  );
+    TEST_EQUAL( ret, ref_ret );
+
+    if( ret == 0 ) {
+        ASSERT_COMPARE( exp->x, exp->len, addr, sizeof( addr ) );
+    }
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:MBEDTLS_X509_CRT_PARSE_C:MBEDTLS_TEST_HOOKS */
+void x509_ipv6_parse( char * ipv6, data_t * exp, int ref_ret )
+{
+    unsigned char addr[16];
+    int ret = mbedtls_x509_parse_ipv6( ipv6, strlen(ipv6), addr  );
+    TEST_EQUAL( ret, ref_ret );
+
+    if( ret == 0 ) {
+        ASSERT_COMPARE( exp->x, exp->len, addr, sizeof( addr ) );
+    }
 }
 /* END_CASE */
 
